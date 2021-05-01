@@ -1,131 +1,144 @@
-const BG_COLOUR = '#231f20';
-const SNAKE_COLOUR = '#c2c2c2';
-const FOOD_COLOUR = '#e66916';
+// const BG_COLOUR = '#231f20';
+// const SNAKE_COLOUR = '#c2c2c2';
+// const FOOD_COLOUR = '#e66916';
 
 const socket = io('https://desolate-wave-75104.herokuapp.com/');
+//const socket = io('http://localhost:3000/');
 
-socket.on('init', handleInit);
-socket.on('gameState', handleGameState);
-socket.on('gameOver', handleGameOver);
-socket.on('gameCode', handleGameCode);
-socket.on('unknownCode', handleUnknownCode);
-socket.on('tooManyPlayers', handleTooManyPlayers);
-socket.on('Slav', console.log('HELOOOO'));
+// socket.on('init', handleInit);
+// socket.on('gameState', handleGameState);
+// socket.on('gameOver', handleGameOver);
+// socket.on('gameCode', handleGameCode);
+// socket.on('unknownCode', handleUnknownCode);
+// socket.on('tooManyPlayers', handleTooManyPlayers);
 
-const gameScreen = document.getElementById('gameScreen');
-const initialScreen = document.getElementById('initialScreen');
-const newGameBtn = document.getElementById('newGameButton');
-const joinGameBtn = document.getElementById('joinGameButton');
-const gameCodeInput = document.getElementById('gameCodeInput');
-const gameCodeDisplay = document.getElementById('gameCodeDisplay');
+// const gameScreen = document.getElementById('gameScreen');
+// const initialScreen = document.getElementById('initialScreen');
+// const newGameBtn = document.getElementById('newGameButton');
+// const joinGameBtn = document.getElementById('joinGameButton');
+// const gameCodeInput = document.getElementById('gameCodeInput');
+// const gameCodeDisplay = document.getElementById('gameCodeDisplay');
 
-newGameBtn.addEventListener('click', newGame);
-joinGameBtn.addEventListener('click', joinGame);
+// newGameBtn.addEventListener('click', newGame);
+// joinGameBtn.addEventListener('click', joinGame);
 
-
-function newGame() {
-  socket.emit('newGame');
-  init();
+const message = document.getElementById('message');
+const send_message = document.getElementById('send_message');
+send_message.addEventListener('click', sendMsg);
+function sendMsg(){
+  socket.emit('update', message.value);
 }
+socket.on('update', function(data) {
+  console.log('client update');
 
-function joinGame() {
-  const code = gameCodeInput.value;
-  socket.emit('joinGame', code);
-  init();
-}
+  let li = document.createElement('li');
+  li.textContent = data;
+  chatroom.appendChild(li);
+});
 
-let canvas, ctx;
-let playerNumber;
-let gameActive = false;
+// function newGame() {
+//   socket.emit('newGame');
+//   init();
+// }
 
-function init() {
-  initialScreen.style.display = "none";
-  gameScreen.style.display = "block";
+// function joinGame() {
+//   const code = gameCodeInput.value;
+//   socket.emit('joinGame', code);
+//   init();
+// }
 
-  canvas = document.getElementById('canvas');
-  ctx = canvas.getContext('2d');
+// let canvas, ctx;
+// let playerNumber;
+// let gameActive = false;
 
-  canvas.width = canvas.height = 600;
+// function init() {
+//   initialScreen.style.display = "none";
+//   gameScreen.style.display = "block";
 
-  ctx.fillStyle = BG_COLOUR;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+//   canvas = document.getElementById('canvas');
+//   ctx = canvas.getContext('2d');
 
-  document.addEventListener('keydown', keydown);
-  gameActive = true;
-}
+//   canvas.width = canvas.height = 600;
 
-function keydown(e) {
-  socket.emit('keydown', e.keyCode);
-}
+//   ctx.fillStyle = BG_COLOUR;
+//   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-function paintGame(state) {
-  ctx.fillStyle = BG_COLOUR;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+//   document.addEventListener('keydown', keydown);
+//   gameActive = true;
+// }
 
-  const food = state.food;
-  const gridsize = state.gridsize;
-  const size = canvas.width / gridsize;
+// function keydown(e) {
+//   socket.emit('keydown', e.keyCode);
+// }
 
-  ctx.fillStyle = FOOD_COLOUR;
-  ctx.fillRect(food.x * size, food.y * size, size, size);
+// function paintGame(state) {
+//   ctx.fillStyle = BG_COLOUR;
+//   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  paintPlayer(state.players[0], size, SNAKE_COLOUR);
-  paintPlayer(state.players[1], size, 'red');
-}
+//   const food = state.food;
+//   const gridsize = state.gridsize;
+//   const size = canvas.width / gridsize;
 
-function paintPlayer(playerState, size, colour) {
-  const snake = playerState.snake;
+//   ctx.fillStyle = FOOD_COLOUR;
+//   ctx.fillRect(food.x * size, food.y * size, size, size);
 
-  ctx.fillStyle = colour;
-  for (let cell of snake) {
-    ctx.fillRect(cell.x * size, cell.y * size, size, size);
-  }
-}
+//   paintPlayer(state.players[0], size, SNAKE_COLOUR);
+//   paintPlayer(state.players[1], size, 'red');
+// }
 
-function handleInit(number) {
-  playerNumber = number;
-}
+// function paintPlayer(playerState, size, colour) {
+//   const snake = playerState.snake;
 
-function handleGameState(gameState) {
-  if (!gameActive) {
-    return;
-  }
-  gameState = JSON.parse(gameState);
-  requestAnimationFrame(() => paintGame(gameState));
-}
+//   ctx.fillStyle = colour;
+//   for (let cell of snake) {
+//     ctx.fillRect(cell.x * size, cell.y * size, size, size);
+//   }
+// }
 
-function handleGameOver(data) {
-  if (!gameActive) {
-    return;
-  }
-  data = JSON.parse(data);
+// function handleInit(number) {
+//   playerNumber = number;
+// }
 
-  gameActive = false;
+// function handleGameState(gameState) {
+//   if (!gameActive) {
+//     return;
+//   }
+//   gameState = JSON.parse(gameState);
+//   requestAnimationFrame(() => paintGame(gameState));
+// }
 
-  if (data.winner === playerNumber) {
-    alert('You Win!');
-  } else {
-    alert('You Lose :(');
-  }
-}
+// function handleGameOver(data) {
+//   if (!gameActive) {
+//     return;
+//   }
+//   data = JSON.parse(data);
 
-function handleGameCode(gameCode) {
-  gameCodeDisplay.innerText = gameCode;
-}
+//   gameActive = false;
 
-function handleUnknownCode() {
-  reset();
-  alert('Unknown Game Code')
-}
+//   if (data.winner === playerNumber) {
+//     alert('You Win!');
+//   } else {
+//     alert('You Lose :(');
+//   }
+// }
 
-function handleTooManyPlayers() {
-  reset();
-  alert('This game is already in progress');
-}
+// function handleGameCode(gameCode) {
+//   gameCodeDisplay.innerText = gameCode;
+// }
 
-function reset() {
-  playerNumber = null;
-  gameCodeInput.value = '';
-  initialScreen.style.display = "block";
-  gameScreen.style.display = "none";
-}
+// function handleUnknownCode() {
+//   reset();
+//   alert('Unknown Game Code')
+// }
+
+// function handleTooManyPlayers() {
+//   reset();
+//   alert('This game is already in progress');
+// }
+
+// function reset() {
+//   playerNumber = null;
+//   gameCodeInput.value = '';
+//   initialScreen.style.display = "block";
+//   gameScreen.style.display = "none";
+// }
